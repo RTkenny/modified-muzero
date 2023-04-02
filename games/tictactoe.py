@@ -75,7 +75,7 @@ class MuZeroConfig:
         ### Training
         self.results_path = pathlib.Path(__file__).resolve().parents[1] / "results" / pathlib.Path(__file__).stem / datetime.datetime.now().strftime("%Y-%m-%d--%H-%M-%S")  # Path to store the model weights and TensorBoard logs
         self.save_model = True  # Save the checkpoint in results_path as model.checkpoint
-        self.training_steps = 1000000  # Total number of training steps (ie weights update according to a batch)
+        self.training_steps = 100000  # Total number of training steps (ie weights update according to a batch)
         self.batch_size = 64  # Number of parts of games to train on at each training step
         self.checkpoint_interval = 10  # Number of training steps before using the model for self-playing
         self.value_loss_weight = 0.25  # Scale the value loss to avoid overfitting of the value function, paper recommends 0.25 (See paper appendix Reanalyze)
@@ -88,7 +88,7 @@ class MuZeroConfig:
         # Exponential learning rate schedule
         self.lr_init = 0.003  # Initial learning rate
         self.lr_decay_rate = 1  # Set it to 1 to use a constant learning rate
-        self.lr_decay_steps = 10000
+        self.lr_decay_steps = 1000
 
 
 
@@ -179,7 +179,7 @@ class Game(AbstractGame):
         Display the game observation.
         """
         self.env.render()
-        input("Press enter to take a step ")
+        # input("Press enter to take a step ")
 
     def human_to_action(self):
         """
