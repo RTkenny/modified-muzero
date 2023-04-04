@@ -33,6 +33,8 @@ class CPUActor:
         summary = str(model).replace("\n", " \n\n")
         return weigths, summary
 
+def logging_loop():
+
 if __name__ == "__main__":
     checkpoint = {
                 "weights": None,
@@ -53,6 +55,10 @@ if __name__ == "__main__":
                 "num_reanalysed_games": 0,
                 "terminate": False,
     }
+
+
+
+
     buffer = {}
     config = tictactoe.MuZeroConfig()
     Game = tictactoe.Game
@@ -63,7 +69,7 @@ if __name__ == "__main__":
     cpu_weights = cpu_actor.get_initial_weights.remote(config)
     checkpoint["weights"], summary = copy.deepcopy(ray.get(cpu_weights))
 
-    training_worker = trainer.Trainer.remote(checkpoint, config)
+    training_worker = trainer.Trainer.options(num_gpus=1).remote(checkpoint, config)
 
     shared_storage_worker = shared_storage.SharedStorage.remote(
         checkpoint,
@@ -85,4 +91,7 @@ if __name__ == "__main__":
             shared_storage_worker, replay_buffer_worker
     )
 
+    training_worker.continuous_update_weights.remote(
+        replay_buffer_worker, shared_storage_worker
+    )
     time.sleep(5)
