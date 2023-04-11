@@ -6,7 +6,7 @@ import numpy
 import torch
 
 import models
-
+import replay_buffer_sp
 
 
 class Trainer:
@@ -57,6 +57,42 @@ class Trainer:
             self.optimizer.load_state_dict(
                 copy.deepcopy(initial_checkpoint["optimizer_state"])
             )
+
+    def nums_update_weights(self, nums, replay_buffer, shared_storage):
+        for i in range(nums):
+            index_batch, batch = replay_buffer.get_batch()
+            self.update_lr()
+            (
+                priorities,
+                total_loss,
+                value_loss,
+                reward_loss,
+                policy_loss,
+            ) = self.update_weights(batch)
+
+            #save to shared_storage
+            if self.training_step % self.config.checkpoint_interval == 0:
+                shared_storage.set_info(
+                    {
+                        "weights": copy.deepcopy(self.model.get_weights()),
+                        "optimizer_state": copy.deepcopy(
+                            models.dict_to_cpu(self.optimizer.state_dict())
+                        ),
+                    }
+                )
+                if self.config.save_model:
+                    shared_storage.save_checkpoint()
+            shared_storage.set_info(
+                {
+                    "training_step": self.training_step,
+                    "lr": self.optimizer.param_groups[0]["lr"],
+                    "total_loss": total_loss,
+                    "value_loss": value_loss,
+                    "reward_loss": reward_loss,
+                    "policy_loss": policy_loss,
+                }
+            )
+
 
     def continuous_update_weights(self, replay_buffer, shared_storage):
         # Wait for the replay buffer to be filled

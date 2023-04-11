@@ -26,6 +26,21 @@ class SelfPlay:
         self.model.to(torch.device("cuda" if self.config.selfplay_on_gpu else "cpu"))
         self.model.eval()
 
+    def set_self_play_model(self, shared_storage):
+        self.model.set_weights(shared_storage.get_info("weights"))
+
+    def nums_self_play(self, nums, shared_storage, replay_buffer):
+        self.set_self_play_model(shared_storage)
+        for i in range(nums):
+            game_history = self.play_game(
+                self.config.visit_softmax_temperature_fn(0),
+                self.config.temperature_threshold,
+                False,
+                "self",
+                0,
+            )
+            replay_buffer.save_game(game_history, shared_storage)
+
     def continuous_self_play(self, shared_storage, replay_buffer, test_mode=False):
         while ray.get(
             shared_storage.get_info.remote("training_step")
