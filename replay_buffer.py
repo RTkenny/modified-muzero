@@ -52,6 +52,7 @@ class ReplayBuffer:
 
         self.buffer[self.num_played_games] = game_history
         self.num_played_games += 1
+        # print(self.num_played_games)
         self.num_played_steps += len(game_history.root_values)
         self.total_samples += len(game_history.root_values)
 
