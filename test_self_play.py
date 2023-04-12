@@ -1,4 +1,4 @@
-import self_play_st
+import self_play_sp
 import copy
 from games import tictactoe
 import models
@@ -30,6 +30,6 @@ if __name__ == "__main__":
     #             "terminate": False,
     # }
     # checkpoint["weights"] = copy.deepcopy(weigths)
-    self_play_worker = self_play_st.SelfPlay(checkpoint, Game, config, config.seed)
+    self_play_worker = self_play_sp.SelfPlay(checkpoint, Game, config, config.seed)
     gamehistory = self_play_worker.play_game(1, config.temperature_threshold, True, 'self', 0)
 
